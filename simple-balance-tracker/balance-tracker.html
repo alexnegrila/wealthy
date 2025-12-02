@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Year Balance Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .currency {
+            text-align: right;
+        }
+
+        .calculated {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+
+        .summary {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .summary-item strong {
+            color: #333;
+        }
+
+        .summary-value {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.secondary {
+            background-color: #2196F3;
+        }
+
+        button.secondary:hover {
+            background-color: #0b7dda;
+        }
+
+        button.danger {
+            background-color: #f44336;
+        }
+
+        button.danger:hover {
+            background-color: #da190b;
+        }
+
+        .actions {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-btn:hover {
+            background-color: #da190b;
+        }
+
+        .add-row-section {
+            margin-top: 10px;
+        }
+
+        .note {
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>5-Year Balance Tracker</h1>
+
+        <div class="summary">
+            <div class="summary-item">
+                <strong>Monthly Net Income:</strong>
+                <span class="summary-value" id="netIncome">£0.00</span>
+            </div>
+            <div class="summary-item">
+                <strong>Current Balance:</strong>
+                <span class="summary-value" id="currentBalance">£10,000.00</span>
+            </div>
+            <div class="summary-item">
+                <strong>Projected Balance (1 Year):</strong>
+                <span class="summary-value" id="projectedBalance">£0.00</span>
+            </div>
+        </div>
+
+        <h2>Income & Starting Balance</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value (£)</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Monthly Income</td>
+                    <td class="currency">
+                        <input type="number" id="monthlyIncome" value="3000" step="0.01" oninput="calculate()">
+                    </td>
+                    <td>Your regular monthly income</td>
+                </tr>
+                <tr>
+                    <td>Starting Balance</td>
+                    <td class="currency">
+                        <input type="number" id="startingBalance" value="10000" step="0.01" oninput="calculate()">
+                    </td>
+                    <td>Your current cash balance</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Monthly Expenses</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Expense Category</th>
+                    <th>Monthly Amount (£)</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expensesTable">
+                <tr>
+                    <td>Rent</td>
+                    <td class="currency"><input type="number" class="expense" value="1200" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Housing"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Utilities</td>
+                    <td class="currency"><input type="number" class="expense" value="150" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Electric, gas, water"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Food</td>
+                    <td class="currency"><input type="number" class="expense" value="400" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Groceries and dining"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Transport</td>
+                    <td class="currency"><input type="number" class="expense" value="200" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Fuel, public transport"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Insurance</td>
+                    <td class="currency"><input type="number" class="expense" value="100" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Car, health, life"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Entertainment</td>
+                    <td class="currency"><input type="number" class="expense" value="150" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Leisure activities"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Subscriptions</td>
+                    <td class="currency"><input type="number" class="expense" value="50" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Streaming, apps"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Healthcare</td>
+                    <td class="currency"><input type="number" class="expense" value="100" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Medical expenses"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Savings Goal</td>
+                    <td class="currency"><input type="number" class="expense" value="200" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Emergency fund"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>Other</td>
+                    <td class="currency"><input type="number" class="expense" value="100" step="0.01" oninput="calculate()"></td>
+                    <td><input type="text" value="Miscellaneous"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+                <tr class="calculated">
+                    <td><strong>Total Monthly Expenses</strong></td>
+                    <td class="currency" id="totalExpenses"><strong>£2,650.00</strong></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="add-row-section">
+            <button class="secondary" onclick="addExpenseRow()">+ Add Expense Row</button>
+        </div>
+
+        <div class="actions">
+            <button onclick="saveData()">Save Data</button>
+            <button onclick="loadData()">Load Saved Data</button>
+            <button onclick="resetData()">Reset to Defaults</button>
+            <p class="note">Data is saved in your browser's local storage</p>
+        </div>
+    </div>
+
+    <script>
+        function formatCurrency(value) {
+            return '£' + parseFloat(value).toLocaleString('en-GB', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function calculate() {
+            // Get income
+            const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+            
+            // Calculate total expenses
+            const expenseInputs = document.querySelectorAll('.expense');
+            let totalExpenses = 0;
+            expenseInputs.forEach(input => {
+                totalExpenses += parseFloat(input.value) || 0;
+            });
+
+            // Update total expenses display
+            document.getElementById('totalExpenses').innerHTML = '<strong>' + formatCurrency(totalExpenses) + '</strong>';
+
+            // Calculate net income
+            const netIncome = income - totalExpenses;
+            document.getElementById('netIncome').textContent = formatCurrency(netIncome);
+
+            // Get starting balance
+            const startingBalance = parseFloat(document.getElementById('startingBalance').value) || 0;
+            document.getElementById('currentBalance').textContent = formatCurrency(startingBalance);
+
+            // Calculate projected balance (1 year)
+            const projectedBalance = startingBalance + (netIncome * 12);
+            document.getElementById('projectedBalance').textContent = formatCurrency(projectedBalance);
+
+            // Change color based on net income
+            const netIncomeElement = document.getElementById('netIncome');
+            if (netIncome < 0) {
+                netIncomeElement.style.color = '#c62828';
+            } else if (netIncome > 500) {
+                netIncomeElement.style.color = '#2e7d32';
+            } else {
+                netIncomeElement.style.color = '#f57c00';
+            }
+        }
+
+        function saveData() {
+            const data = {
+                monthlyIncome: document.getElementById('monthlyIncome').value,
+                startingBalance: document.getElementById('startingBalance').value,
+                expenses: []
+            };
+
+            const expenseInputs = document.querySelectorAll('.expense');
+            expenseInputs.forEach(input => {
+                data.expenses.push(input.value);
+            });
+
+            localStorage.setItem('balanceTrackerData', JSON.stringify(data));
+            alert('Data saved successfully!');
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('balanceTrackerData');
+            if (!savedData) {
+                alert('No saved data found!');
+                return;
+            }
+
+            const data = JSON.parse(savedData);
+            document.getElementById('monthlyIncome').value = data.monthlyIncome;
+            document.getElementById('startingBalance').value = data.startingBalance;
+
+            const expenseInputs = document.querySelectorAll('.expense');
+            expenseInputs.forEach((input, index) => {
+                if (data.expenses[index] !== undefined) {
+                    input.value = data.expenses[index];
+                }
+            });
+
+            calculate();
+            alert('Data loaded successfully!');
+        }
+
+        function resetData() {
+            if (!confirm('Are you sure you want to reset to default values?')) {
+                return;
+            }
+
+            document.getElementById('monthlyIncome').value = 3000;
+            document.getElementById('startingBalance').value = 10000;
+
+            const defaultExpenses = [1200, 150, 400, 200, 100, 150, 50, 100, 200, 100];
+            const expenseInputs = document.querySelectorAll('.expense');
+            expenseInputs.forEach((input, index) => {
+                input.value = defaultExpenses[index];
+            });
+
+            calculate();
+        }
+
+        function addExpenseRow() {
+            const table = document.getElementById('expensesTable');
+            const totalRow = table.querySelector('.calculated');
+            
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" value="New Expense" style="width: 100%; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"></td>
+                <td class="currency"><input type="number" class="expense" value="0" step="0.01" oninput="calculate()"></td>
+                <td><input type="text" value="" style="width: 100%; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"></td>
+                <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+            `;
+            
+            table.insertBefore(newRow, totalRow);
+            calculate();
+        }
+
+        function removeRow(button) {
+            if (!confirm('Are you sure you want to remove this expense?')) {
+                return;
+            }
+            const row = button.closest('tr');
+            row.remove();
+            calculate();
+        }
+
+        // Calculate on page load
+        calculate();
+    </script>
+</body>
+</html>
